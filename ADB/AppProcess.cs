@@ -32,8 +32,6 @@ namespace ADB
 
             //string output = "";
 
-            //tes git
-            // hahahha
 
             output.Output += process.StandardOutput.ReadToEnd();
             output.Error += process.StandardError.ReadToEnd();
@@ -82,7 +80,13 @@ namespace ADB
 
         public static string getFocusedActivity()
         {
-            return RunProcess("adb shell dumpsys activity activities | grep mFocusedActivity").Output;
+            return RunProcess("adb shell dumpsys activity activities | grep mResumedActivity").Output;
+            //string s=  RunProcess("adb shell dumpsys activity activities | grep mResumedActivity").Output;
+
+
+
+
+            //return RunProcess("adb shell dumpsys activity activities | grep mFocusedActivity").Output;
             //var info = new System.Diagnostics.ProcessStartInfo();
             //string anyCommand = String.Format("adb shell dumpsys activity activities | grep mFocusedActivity");
             //info.FileName = @"C:\Windows\System32\cmd.exe";
@@ -108,6 +112,11 @@ namespace ADB
         }
 
 
+        public static bool isAppRunning()
+        {
+            string output = getFocusedActivity();
+            return output.Trim().Contains(Globals.APP_NAME);
+        }
 
 
         public static bool isAdActivity()
@@ -125,7 +134,9 @@ namespace ADB
 
         public static void RunOffer()
         {
-            Tap(new Point(600, 550));
+             
+            //Tap(new Point(600, 550));
+            Tap(ConfigReader.GetPoint("touch", "offers"));
         }
 
         public static void CloseNoOfferWindow()
@@ -133,7 +144,9 @@ namespace ADB
             Random random = new Random();
             int x = random.Next(700, 780);
             int y = random.Next(420, 500);
-            Tap(new Point(x, y));
+            
+            //Tap(new Point(x, y));
+            Tap(ConfigReader.GetPoint("touch", "no-offer"));
         }
 
         public static void CloseEndOfOfferWindow()
@@ -144,7 +157,8 @@ namespace ADB
 
         public static void OpenOffersWindow()
         {
-            Tap(new Point(850, 130));
+            Tap(ConfigReader.GetPoint("touch", "prepare"));
+            //Tap(new Point(850, 130));
         }
 
         public static void Wait()

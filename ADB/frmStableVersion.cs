@@ -23,7 +23,7 @@ namespace ADB
         private BackgroundWorker bwResetAdId;
         private Boolean ToAddAsWatched = true;
         private DateTime startDate = new DateTime();
-
+        IniFile f;
 
         public frmStableVersion()
         {
@@ -47,25 +47,46 @@ namespace ADB
             bwOpenGame.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.bwOpenGame_RunWorkerCompleted);
 
 
+
+            f = new IniFile(@"Config\config.ini");
+
+
         }
 
 
+        BindingList<string> bind = new BindingList<string>(Globals.MainLogs);
+
         private void bwPlayAndWatchAds_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
+            //bind = new BindingList<string>(Globals.MainLogs);
+            lstLog.DataSource = null;
+            lstLog.DataSource = Globals.MainLogs;
+            lstLog.SelectedIndex = -1;
+            //lstLog.BeginUpdate();
+            //if (Logger.ReadLog() != null)
+            //{
+            //    string[] lines = Logger.ReadLog();
+            //    lstLog.Items.Clear();
+            //    if (lines != null)
+            //        lstLog.Items.AddRange(lines);
+            //}
 
-            if (Logger.ReadLog() != null)
-            {
-                string[] lines = Logger.ReadLog();
-                lstLog.Items.Clear();
-                if (lines != null)
-                    lstLog.Items.AddRange(lines);
-            }
+            ////((CurrencyManager)lstLog.BindingContext[Globals.MainLogs]).Refresh();
+            //lstLog.EndUpdate();
+
+            //if (Logger.ReadLog() != null)
+            //{
+            //    string[] lines = Logger.ReadLog();
+            //    lstLog.Items.Clear();
+            //    if (lines != null)
+            //        lstLog.Items.AddRange(lines);
+            //}
 
             lblNoOfferInARow.Text = Globals.NoOffersInARow + "";
             lblWatchedAds.Text = Globals.WatchedAds + "";
             lblLoadingInARow.Text = Globals.LoadingTriesInARow + "";
             lblElseInARow.Text = Globals.ElseInARow + "";
-
+            lblAppNotRunningInARow.Text = Globals.AppNotRunningInARow + "";
 
             //if (Globals.ElseInARow > 20)
             //{
@@ -74,6 +95,13 @@ namespace ADB
             //    Globals.WriteLog(DateTime.Now + "tap close button 0000");
             //    return;
             //}
+
+            if (Globals.AppNotRunningInARow > 15)
+            {
+                bwOpenGame.RunWorkerAsync();
+                return;
+            }
+
 
             if (Globals.GameCrashed == true)
             {
@@ -91,6 +119,13 @@ namespace ADB
 
             if (Globals.NoOffersInARow > 5)
             {
+
+                //lstWatchedAds.Items.Add(Globals.WatchedAds);
+                //Globals.WatchedAds = 0;
+                //Globals.NoOffersInARow = 0;
+                //Globals.LoadingTriesInARow = 0;
+
+
                 bwResetAdId.RunWorkerAsync();
                 return;
             }
@@ -105,7 +140,15 @@ namespace ADB
                 lstWatchedAds.Items.Add(Globals.WatchedAds);
                 Globals.WatchedAds = 0;
                 lblWatchedAds.Text = "0";
+
             }
+
+            //int sm = 0;
+            //foreach (string s in lstWatchedAds.Items)
+            //{
+            //    sm += Int32.Parse(s.Trim());
+            //}
+            //lblSum.Text = "Sum : " + sm;
 
         }
 
@@ -116,6 +159,7 @@ namespace ADB
                 Globals.LoadingTriesInARow = 0;
                 Globals.NoOffersInARow = 0;
                 Globals.ElseInARow = 0;
+                Globals.AppNotRunningInARow = 0;
                 bwPlayAndWatchAds.RunWorkerAsync();
                 return;
             }
@@ -135,6 +179,7 @@ namespace ADB
                 Globals.LoadingTriesInARow = 0;
                 Globals.NoOffersInARow = 0;
                 Globals.ElseInARow = 0;
+                Globals.AppNotRunningInARow = 0;
                 bwPlayAndWatchAds.RunWorkerAsync();
                 return;
             }
@@ -154,8 +199,15 @@ namespace ADB
                 Globals.LoadingTriesInARow = 0;
                 Globals.NoOffersInARow = 0;
                 Globals.ElseInARow = 0;
+                Globals.AppNotRunningInARow = 0;
                 bwPlayAndWatchAds.RunWorkerAsync();
                 return;
+            }
+            else
+            {
+                lstWatchedAds.Items.Add(Globals.WatchedAds);
+                Globals.WatchedAds = 0;
+                lblWatchedAds.Text = "0";
             }
         }
 
@@ -166,6 +218,17 @@ namespace ADB
             string msg = "";
             string fileName = "";
             string testImageTwo = "";
+
+            if (AppProcess.isAppRunning() == false)
+            {
+                Globals.AppNotRunningInARow++;
+                return;
+            }
+
+
+
+
+
             if (AppProcess.isAdActivity() == true)
             {
                 if (ToAddAsWatched == true)
@@ -181,7 +244,9 @@ namespace ADB
                 AppProcess.Wait();
                 Globals.ElseInARow++;
                 sleepTime = 2000;
+
                 msg = DateTime.Now + " " + "else 2000 diffs : " + DateTime.Now.Subtract(startDate).Seconds + "";
+                Globals.MainLogs.Add(msg);
 
 
                 System.Threading.Thread.Sleep(2000);
@@ -199,14 +264,18 @@ namespace ADB
                     if (imageOne.Size.Width == Globals.ScreenSize.Height)
                     {
                         AppProcess.Tap(new Point(650, 50));
+                        //AppProcess.Tap(ConfigReader.GetPoint("touch", "no-close-issue-port"));
                     }
                     else
                     {
                         AppProcess.Tap(new Point(1360, 50));
+                        //AppProcess.Tap(ConfigReader.GetPoint("touch", "no-close-issue-land"));
                     }
 
                     Globals.ElseInARow = 0;
-                    Logger.WriteLog(DateTime.Now + " " + "tap close button 0000");
+                    msg = DateTime.Now + " " + "tap close button 0000";
+                    Logger.WriteLog(msg);
+                    Globals.MainLogs.Add(msg);
                     //return;
                 }
 
@@ -245,8 +314,9 @@ namespace ADB
                     int time = random.Next(10000, 20000);
                     sleepTime = time;
                     msg = DateTime.Now + " offers " + time;
+                    Globals.MainLogs.Add(msg);
                 }
-                else if (ImageComparer.CompareImages(Globals.NoOfferImage, testImageTwo, Globals.AForgeConfig.CompareLevel + 0.03, Globals.Temp_Dir, Globals.AForgeConfig.SimilarityThreshold) == true)
+                else if (ImageComparer.CompareImages(Globals.NoOfferImage, testImageTwo, Globals.AForgeConfig.CompareLevel + 0.01, Globals.Temp_Dir, Globals.AForgeConfig.SimilarityThreshold) == true)
                 {
                     Globals.NoOffersInARow++;
                     Globals.LoadingTriesInARow = 0;
@@ -254,6 +324,7 @@ namespace ADB
                     AppProcess.CloseNoOfferWindow();
                     sleepTime = 2000;
                     msg = DateTime.Now + " " + "no offer 2000";
+                    Globals.MainLogs.Add(msg);
                 }
                 else if (ImageComparer.CompareImages(Globals.LoadingImage, testImageTwo, Globals.AForgeConfig.CompareLevel, Globals.Temp_Dir, Globals.AForgeConfig.SimilarityThreshold) == true)
                 {
@@ -262,6 +333,7 @@ namespace ADB
 
                     sleepTime = 2000;
                     msg = DateTime.Now + " " + "loading 2000";
+                    Globals.MainLogs.Add(msg);
                 }
                 else if (ImageComparer.CompareImages(Globals.EndOfferImage, testImageTwo, Globals.AForgeConfig.CompareLevel + 0.03, Globals.Temp_Dir, Globals.AForgeConfig.SimilarityThreshold) == true)
                 {
@@ -271,6 +343,7 @@ namespace ADB
                     //Globals.WatchedAds++;
                     sleepTime = 1000;
                     msg = DateTime.Now + " " + "end of offer 1000";
+                    Globals.MainLogs.Add(msg);
                     AppProcess.CloseEndOfOfferWindow();
                 }
                 else if (ImageComparer.CompareImages(Globals.IntroImage, testImageTwo, Globals.AForgeConfig.CompareLevel, Globals.Temp_Dir, Globals.AForgeConfig.SimilarityThreshold) == true)
@@ -281,6 +354,7 @@ namespace ADB
                     //Globals.WatchedAds++;
                     sleepTime = 1000;
                     msg = DateTime.Now + " " + "crashed 1000";
+                    Globals.MainLogs.Add(msg);
                     Globals.GameCrashed = true;
                 }
 
@@ -289,43 +363,78 @@ namespace ADB
                     AppProcess.OpenOffersWindow();
                     sleepTime = 1000;
                     msg = DateTime.Now + " " + "prepare 1000";
+                    Globals.MainLogs.Add(msg);
 
                 }
                 else if (ImageComparer.CompareImages(Globals.PrestigeRewardsImage, testImageTwo, Globals.AForgeConfig.CompareLevel, Globals.Temp_Dir, Globals.AForgeConfig.SimilarityThreshold) == true)
                 {
+
+
+
+                    //AppProcess.Tap(ConfigReader.GetPoint("touch", "pr-rewards"));
                     AppProcess.Tap(new Point(740, 500));
                     System.Threading.Thread.Sleep(500);
+                    //AppProcess.Tap(ConfigReader.GetPoint("touch", "pr-rewards"));
                     AppProcess.Tap(new Point(740, 500));
                     sleepTime = 1000;
                     msg = DateTime.Now + " " + "prestige rewards 1000";
+                    Globals.MainLogs.Add(msg);
 
                 }
                 else if (ImageComparer.CompareImages(Globals.PrestigeRewardsClaimImage, testImageTwo, Globals.AForgeConfig.CompareLevel, Globals.Temp_Dir, Globals.AForgeConfig.SimilarityThreshold) == true)
                 {
+
+                    //AppProcess.Tap(ConfigReader.GetPoint("touch", "pr-rewards-claim"));
                     AppProcess.Tap(new Point(860, 620));
                     sleepTime = 1000;
                     msg = DateTime.Now + " " + "prestige rewards claim 1000";
+                    Globals.MainLogs.Add(msg);
 
                 }
+                else if (ImageComparer.CompareImages(Globals.WarWindow1Image, testImageTwo, Globals.AForgeConfig.CompareLevel, Globals.Temp_Dir, Globals.AForgeConfig.SimilarityThreshold) == true)
+                {
 
+
+                    //AppProcess.Tap(ConfigReader.GetPoint("touch", "war-window-1"));
+                    AppProcess.Tap(new Point(740, 660));
+                    sleepTime = 1000;
+                    msg = DateTime.Now + " " + "war window 1 1000";
+                    Globals.MainLogs.Add(msg);
+
+                }
+                else if (ImageComparer.CompareImages(Globals.WarWindow2Image, testImageTwo, Globals.AForgeConfig.CompareLevel, Globals.Temp_Dir, Globals.AForgeConfig.SimilarityThreshold) == true)
+                {
+                    AppProcess.Tap(ConfigReader.GetPoint("touch", "war-window-2"));
+                    //AppProcess.Tap(new Point(740, 630));
+                    sleepTime = 1000;
+                    msg = DateTime.Now + " " + "war window 2 1000";
+                    Globals.MainLogs.Add(msg);
+
+                }
+                else if (ImageComparer.CompareImages(Globals.FirstScene1Image, testImageTwo, Globals.AForgeConfig.CompareLevel - 0.1, Globals.Temp_Dir,
+                    Globals.AForgeConfig.SimilarityThreshold) == true)
+                {
+                    AppProcess.Swipe(new Point(1200, 700), new Point(100, 0), 500);
+                    sleepTime = 1000;
+                    msg = DateTime.Now + " " + "first screen 1 1000";
+                    Globals.MainLogs.Add(msg);
+                }
+                else if (ImageComparer.CompareImages(Globals.FirstScene2Image, testImageTwo, Globals.AForgeConfig.CompareLevel - 0.1, Globals.Temp_Dir,
+                    Globals.AForgeConfig.SimilarityThreshold) == true)
+                {
+                    AppProcess.Swipe(new Point(1200, 700), new Point(100, 0), 500);
+                    sleepTime = 1000;
+                    msg = DateTime.Now + " " + "first screen 2 1000";
+                    Globals.MainLogs.Add(msg);
+                }
                 else
                 {
                     AppProcess.Wait();
                     Globals.ElseInARow++;
                     sleepTime = 2000;
                     msg = DateTime.Now + " " + "else 2000";
+                    Globals.MainLogs.Add(msg);
                 }
-
-
-
-
-
-
-
-
-
-
-
 
             }
 
@@ -389,28 +498,61 @@ namespace ADB
             AppProcess.OpenGame();
             System.Threading.Thread.Sleep(10000);
 
+            string fileName = "";
+            string testImageTwo = "";
+
+            int cnt = 0;
+            bool whileLoopExit = false;
 
             while (true)
             {
-                string fileName = AppProcess.TakeSceenshot();
-                System.Threading.Timer TheTimer1 = null;
-                int t1 = 0;
-                TheTimer1 = new System.Threading.Timer((ot) =>
+                if (cnt > 5)
                 {
-                    try
-                    {
-                        TheTimer1.Dispose();
-                    }
-                    catch (Exception ex)
-                    {
-                        if (TheTimer1 != null)
-                            TheTimer1.Dispose();
-                    }
+                    break;
+                }
 
-                }, null, 1000, 100);
+                System.Threading.Thread.Sleep(500);
+                fileName = AppProcess.TakeSceenshot();
+                System.Threading.Thread.Sleep(1000);
+
+                //System.Threading.Timer TheTimer1 = null;
+                //int t1 = 0;
+                //TheTimer1 = new System.Threading.Timer((ot) =>
+                //{
+                //    try
+                //    {
+                //        TheTimer1.Dispose();
+                //    }
+                //    catch (Exception ex)
+                //    {
+                //        if (TheTimer1 != null)
+                //            TheTimer1.Dispose();
+                //    }
+
+                //}, null, 1000, 100);
 
 
-                string testImageTwo = Globals.Temp_Dir + "\\" + fileName;
+                testImageTwo = Globals.Temp_Dir + "\\" + fileName;
+
+                if (ImageComparer.CompareImages(Globals.WarWindow1Image, testImageTwo, Globals.AForgeConfig.CompareLevel, Globals.Temp_Dir,
+Globals.AForgeConfig.SimilarityThreshold) == true)
+                {
+                    AppProcess.Tap(new Point(740, 660));
+                    continue;
+                }
+                else if (ImageComparer.CompareImages(Globals.WarWindow11Image, testImageTwo, Globals.AForgeConfig.CompareLevel, Globals.Temp_Dir, Globals.AForgeConfig.SimilarityThreshold) == true)
+                {
+                    AppProcess.Tap(new Point(740, 660));
+                    continue;
+
+                }
+
+                else if (ImageComparer.CompareImages(Globals.WarWindow2Image, testImageTwo, Globals.AForgeConfig.CompareLevel, Globals.Temp_Dir, Globals.AForgeConfig.SimilarityThreshold) == true)
+                {
+                    AppProcess.Tap(new Point(740, 630));
+                    continue;
+
+                }
 
 
                 if (ImageComparer.CompareImages(Globals.PrestigeRewardsClaimImage, testImageTwo, Globals.AForgeConfig.CompareLevel, Globals.Temp_Dir, Globals.AForgeConfig.SimilarityThreshold) == true)
@@ -419,68 +561,61 @@ namespace ADB
                     continue;
                 }
 
+                if (ImageComparer.CompareImages(Globals.StartGamePrestigeRewardsClaimImage, testImageTwo, Globals.AForgeConfig.CompareLevel, Globals.Temp_Dir, Globals.AForgeConfig.SimilarityThreshold) == true)
+                {
+                    AppProcess.Tap(new Point(740, 620));
+                    continue;
+                }
 
-                if (ImageComparer.CompareImages(Globals.FirstScene1Image, testImageTwo, Globals.AForgeConfig.CompareLevel, Globals.Temp_Dir, Globals.AForgeConfig.SimilarityThreshold) == true)
+
+                if (ImageComparer.CompareImages(Globals.FirstScene1Image, testImageTwo, Globals.AForgeConfig.CompareLevel - 0.1, Globals.Temp_Dir, Globals.AForgeConfig.SimilarityThreshold) == true)
                 {
                     break;
                 }
+
+                if (ImageComparer.CompareImages(Globals.WarWindow1Image, testImageTwo, Globals.AForgeConfig.CompareLevel, Globals.Temp_Dir,
+                    Globals.AForgeConfig.SimilarityThreshold) == true)
+                {
+                    AppProcess.Tap(new Point(740, 660));
+                    System.Threading.Thread.Sleep(500);
+                    AppProcess.Swipe(new Point(1200, 700), new Point(100, 0), 500);
+
+
+                    continue;
+                }
+                else if (ImageComparer.CompareImages(Globals.WarWindow2Image, testImageTwo, Globals.AForgeConfig.CompareLevel, Globals.Temp_Dir, Globals.AForgeConfig.SimilarityThreshold) == true)
+                {
+                    AppProcess.Tap(new Point(740, 630));
+
+                    System.Threading.Thread.Sleep(500);
+                    AppProcess.Swipe(new Point(1200, 700), new Point(100, 0), 500);
+
+                    continue;
+
+                }
+
+
 
                 else
                 {
                     AppProcess.SendKey(AndroidKeys.KEYCODE_BACK);
                 }
 
+                cnt++;
 
-
-
+                deleteFiles();
             }
 
-
-            //string fileName = AppProcess.TakeSceenshot();
-            //System.Threading.Timer TheTimer1 = null;
-            //int t1 = 0;
-            //TheTimer1 = new System.Threading.Timer((ot) =>
-            //{
-            //    try
-            //    {
-            //        TheTimer1.Dispose();
-            //    }
-            //    catch (Exception ex)
-            //    {
-            //        if (TheTimer1 != null)
-            //            TheTimer1.Dispose();
-            //    }
-
-            //}, null, 1000, 100);
-            //string testImageTwo = Globals.Temp_Dir + "\\" + fileName;
-
-            //while (ImageComparer.CompareImages(Globals.FirstScene1Image, testImageTwo, Globals.AForgeConfig.CompareLevel, Globals.Temp_Dir, Globals.AForgeConfig.SimilarityThreshold) == false)
-            //{
-            //    AppProcess.SendKey(4);
-            //    System.Threading.Thread.Sleep(500);
-
-            //    fileName = AppProcess.TakeSceenshot();
-            //    System.Threading.Timer TheTimer2 = null;
-            //    t1 = 0;
-            //    TheTimer2 = new System.Threading.Timer((ot) =>
-            //    {
-            //        try
-            //        {
-            //            TheTimer2.Dispose();
-            //        }
-            //        catch (Exception ex)
-            //        {
-            //            if (TheTimer2 != null)
-            //                TheTimer2.Dispose();
-            //        }
-
-            //    }, null, 1000, 100);
-            //    testImageTwo = Globals.Temp_Dir + "\\" + fileName;
-            //}
-
-
-
-
+            if (whileLoopExit == true)
+            {
+                fileName = AppProcess.TakeSceenshot();
+                testImageTwo = Globals.Temp_Dir + "\\" + fileName;
+                if (ImageComparer.CompareImages(Globals.ExitImage, testImageTwo, Globals.AForgeConfig.CompareLevel + 0.01, Globals.Temp_Dir, Globals.AForgeConfig.SimilarityThreshold) == true)
+                {
+                    AppProcess.SendKey(AndroidKeys.KEYCODE_BACK);
+                }
+                deleteFiles();
+            }
 
 
             AppProcess.Swipe(new Point(1200, 700), new Point(100, 0), 500);
@@ -502,9 +637,22 @@ namespace ADB
             //System.Threading.Thread.Sleep(500);
             //AppProcess.Tap(new Point(400, 660));
             //System.Threading.Thread.Sleep(500);
-            AppProcess.Tap(new Point(400, 200));
+
+
+            AppProcess.Tap(ConfigReader.GetPoint("touch", "reset-id"));
+            //AppProcess.Tap(new Point(400, 200));
+
+
+
             System.Threading.Thread.Sleep(500);
-            AppProcess.Tap(new Point(600, 800));
+
+
+            AppProcess.Tap(ConfigReader.GetPoint("touch", "reset-id-dialog"));
+            //AppProcess.Tap(new Point(600, 800));
+
+
+
+
             System.Threading.Thread.Sleep(500);
             AppProcess.SendKey(AndroidKeys.KEYCODE_BACK);
 
@@ -519,25 +667,63 @@ namespace ADB
             AppProcess.OpenGame();
             System.Threading.Thread.Sleep(10000);
 
+
+            string fileName = "";
+            string testImageTwo = "";
+            int cnt = 0;
+            bool whileLoopExit = false;
             while (true)
             {
-                string fileName = AppProcess.TakeSceenshot();
-                System.Threading.Timer TheTimer1 = null;
-                int t1 = 0;
-                TheTimer1 = new System.Threading.Timer((ot) =>
+                if (cnt > 5)
                 {
-                    try
-                    {
-                        TheTimer1.Dispose();
-                    }
-                    catch (Exception ex)
-                    {
-                        if (TheTimer1 != null)
-                            TheTimer1.Dispose();
-                    }
+                    whileLoopExit = true;
+                    break;
+                }
 
-                }, null, 1000, 100);
-                string testImageTwo = Globals.Temp_Dir + "\\" + fileName;
+                System.Threading.Thread.Sleep(500);
+                fileName = AppProcess.TakeSceenshot();
+                System.Threading.Thread.Sleep(1000);
+
+                //System.Threading.Timer TheTimer1 = null;
+                //int t1 = 0;
+                //TheTimer1 = new System.Threading.Timer((ot) =>
+                //{
+                //    try
+                //    {
+                //        TheTimer1.Dispose();
+                //    }
+                //    catch (Exception ex)
+                //    {
+                //        if (TheTimer1 != null)
+                //            TheTimer1.Dispose();
+                //    }
+
+                //}, null, 1000, 100);
+
+                testImageTwo = Globals.Temp_Dir + "\\" + fileName;
+
+
+                if (ImageComparer.CompareImages(Globals.WarWindow1Image, testImageTwo, Globals.AForgeConfig.CompareLevel, Globals.Temp_Dir,
+Globals.AForgeConfig.SimilarityThreshold) == true)
+                {
+                    AppProcess.Tap(new Point(740, 660));
+                    continue;
+                }
+                else if (ImageComparer.CompareImages(Globals.WarWindow11Image, testImageTwo, Globals.AForgeConfig.CompareLevel, Globals.Temp_Dir, Globals.AForgeConfig.SimilarityThreshold) == true)
+                {
+                    AppProcess.Tap(new Point(740, 660));
+                    continue;
+
+                }
+
+                else if (ImageComparer.CompareImages(Globals.WarWindow2Image, testImageTwo, Globals.AForgeConfig.CompareLevel, Globals.Temp_Dir, Globals.AForgeConfig.SimilarityThreshold) == true)
+                {
+                    AppProcess.Tap(new Point(740, 630));
+                    continue;
+
+                }
+
+
 
 
                 if (ImageComparer.CompareImages(Globals.PrestigeRewardsClaimImage, testImageTwo, Globals.AForgeConfig.CompareLevel, Globals.Temp_Dir, Globals.AForgeConfig.SimilarityThreshold) == true)
@@ -546,13 +732,22 @@ namespace ADB
                     continue;
                 }
 
+                if (ImageComparer.CompareImages(Globals.StartGamePrestigeRewardsClaimImage, testImageTwo, Globals.AForgeConfig.CompareLevel, Globals.Temp_Dir, Globals.AForgeConfig.SimilarityThreshold) == true)
+                {
+                    AppProcess.Tap(new Point(740, 620));
+                    continue;
+                }
 
-                if (
-                    ImageComparer.CompareImages(Globals.FirstScene1Image, testImageTwo, Globals.AForgeConfig.CompareLevel, Globals.Temp_Dir, Globals.AForgeConfig.SimilarityThreshold) == true
-                    )
+
+
+                if (ImageComparer.CompareImages(Globals.FirstScene1Image, testImageTwo, Globals.AForgeConfig.CompareLevel - 0.1, Globals.Temp_Dir,
+                    Globals.AForgeConfig.SimilarityThreshold) == true)
                 {
                     break;
                 }
+
+
+
 
                 else
                 {
@@ -560,51 +755,24 @@ namespace ADB
                 }
 
 
+                cnt++;
+
+                deleteFiles();
             }
 
 
+            if (whileLoopExit == true)
+            {
+                fileName = AppProcess.TakeSceenshot();
+                testImageTwo = Globals.Temp_Dir + "\\" + fileName;
+                if (ImageComparer.CompareImages(Globals.ExitImage, testImageTwo, Globals.AForgeConfig.CompareLevel + 0.01,
+                    Globals.Temp_Dir, Globals.AForgeConfig.SimilarityThreshold) == true)
+                {
+                    AppProcess.SendKey(AndroidKeys.KEYCODE_BACK);
+                }
 
-            //string fileName = AppProcess.TakeSceenshot();
-            //System.Threading.Timer TheTimer1 = null;
-            //int t1 = 0;
-            //TheTimer1 = new System.Threading.Timer((ot) =>
-            //{
-            //    try
-            //    {
-            //        TheTimer1.Dispose();
-            //    }
-            //    catch (Exception ex)
-            //    {
-            //        if (TheTimer1 != null)
-            //            TheTimer1.Dispose();
-            //    }
-
-            //}, null, 1000, 100);
-            //string testImageTwo = Globals.Temp_Dir + "\\" + fileName;
-
-            //while (ImageComparer.CompareImages(Globals.FirstScene1Image, testImageTwo, Globals.AForgeConfig.CompareLevel, Globals.Temp_Dir, Globals.AForgeConfig.SimilarityThreshold) == false)
-            //{
-            //    AppProcess.SendKey(4);
-            //    System.Threading.Thread.Sleep(500);
-            //    fileName = AppProcess.TakeSceenshot();
-            //    System.Threading.Timer TheTimer2 = null;
-            //    t1 = 0;
-            //    TheTimer2 = new System.Threading.Timer((ot) =>
-            //    {
-            //        try
-            //        {
-            //            TheTimer2.Dispose();
-            //        }
-            //        catch (Exception ex)
-            //        {
-            //            if (TheTimer2 != null)
-            //                TheTimer2.Dispose();
-            //        }
-
-            //    }, null, 1000, 100);
-            //    testImageTwo = Globals.Temp_Dir + "\\" + fileName;
-            //}
-
+                deleteFiles();
+            }
 
 
             AppProcess.Swipe(new Point(1200, 700), new Point(100, 0), 500);
@@ -615,96 +783,115 @@ namespace ADB
 
         private void bwOpenGame_DoWork(object sender, DoWorkEventArgs e)
         {
+            AppProcess.CloseGame();
+            System.Threading.Thread.Sleep(2000);
             AppProcess.OpenGame();
             System.Threading.Thread.Sleep(10000);
 
+            string fileName = "";
+            string testImageTwo = "";
+
+            int cnt = 0;
+            bool whileLoopExit = false;
 
             while (true)
             {
-                string fileName = AppProcess.TakeSceenshot();
-                System.Threading.Timer TheTimer1 = null;
-                int t1 = 0;
-                TheTimer1 = new System.Threading.Timer((ot) =>
-                {
-                    try
-                    {
-                        TheTimer1.Dispose();
-                    }
-                    catch (Exception ex)
-                    {
-                        if (TheTimer1 != null)
-                            TheTimer1.Dispose();
-                    }
-
-                }, null, 1000, 100);
-                string testImageTwo = Globals.Temp_Dir + "\\" + fileName;
-
-                if (
-                    ImageComparer.CompareImages(Globals.FirstScene1Image, testImageTwo, Globals.AForgeConfig.CompareLevel, Globals.Temp_Dir, Globals.AForgeConfig.SimilarityThreshold) == true
-                    )
+                if (cnt > 5)
                 {
                     break;
                 }
+
+                System.Threading.Thread.Sleep(500);
+                fileName = AppProcess.TakeSceenshot();
+                System.Threading.Thread.Sleep(1000);
+
+                //System.Threading.Timer TheTimer1 = null;
+                //int t1 = 0;
+                //TheTimer1 = new System.Threading.Timer((ot) =>
+                //{
+                //    try
+                //    {
+                //        TheTimer1.Dispose();
+                //    }
+                //    catch (Exception ex)
+                //    {
+                //        if (TheTimer1 != null)
+                //            TheTimer1.Dispose();
+                //    }
+
+                //}, null, 1000, 100);
+
+
+                testImageTwo = Globals.Temp_Dir + "\\" + fileName;
+
+
+                if (ImageComparer.CompareImages(Globals.WarWindow1Image, testImageTwo, Globals.AForgeConfig.CompareLevel, Globals.Temp_Dir,
+Globals.AForgeConfig.SimilarityThreshold) == true)
+                {
+                    AppProcess.Tap(new Point(740, 660));
+                    continue;
+                }
+                else if (ImageComparer.CompareImages(Globals.WarWindow11Image, testImageTwo, Globals.AForgeConfig.CompareLevel, Globals.Temp_Dir, Globals.AForgeConfig.SimilarityThreshold) == true)
+                {
+                    AppProcess.Tap(new Point(740, 660));
+                    continue;
+
+                }
+
+                else if (ImageComparer.CompareImages(Globals.WarWindow2Image, testImageTwo, Globals.AForgeConfig.CompareLevel, Globals.Temp_Dir, Globals.AForgeConfig.SimilarityThreshold) == true)
+                {
+                    AppProcess.Tap(new Point(740, 630));
+                    continue;
+
+                }
+
+
+
+                if (ImageComparer.CompareImages(Globals.PrestigeRewardsClaimImage, testImageTwo, Globals.AForgeConfig.CompareLevel, Globals.Temp_Dir, Globals.AForgeConfig.SimilarityThreshold) == true)
+                {
+                    AppProcess.Tap(new Point(860, 620));
+                    continue;
+                }
+
+                if (ImageComparer.CompareImages(Globals.StartGamePrestigeRewardsClaimImage, testImageTwo, Globals.AForgeConfig.CompareLevel, Globals.Temp_Dir, Globals.AForgeConfig.SimilarityThreshold) == true)
+                {
+                    AppProcess.Tap(new Point(740, 620));
+                    continue;
+                }
+
+
+                if (ImageComparer.CompareImages(Globals.FirstScene1Image, testImageTwo, Globals.AForgeConfig.CompareLevel - 0.1, Globals.Temp_Dir, Globals.AForgeConfig.SimilarityThreshold) == true)
+                {
+                    break;
+                }
+
 
                 else
                 {
                     AppProcess.SendKey(AndroidKeys.KEYCODE_BACK);
                 }
 
+                cnt++;
+
+                deleteFiles();
+            }
+
+            if (whileLoopExit == true)
+            {
+                fileName = AppProcess.TakeSceenshot();
+                testImageTwo = Globals.Temp_Dir + "\\" + fileName;
+                if (ImageComparer.CompareImages(Globals.ExitImage, testImageTwo, Globals.AForgeConfig.CompareLevel + 0.01, Globals.Temp_Dir, Globals.AForgeConfig.SimilarityThreshold) == true)
+                {
+                    AppProcess.SendKey(AndroidKeys.KEYCODE_BACK);
+                }
+                deleteFiles();
             }
 
 
-            //string fileName = AppProcess.TakeSceenshot();
-            //System.Threading.Timer TheTimer1 = null;
-            //int t1 = 0;
-            //TheTimer1 = new System.Threading.Timer((ot) =>
-            //{
-            //    try
-            //    {
-            //        TheTimer1.Dispose();
-            //    }
-            //    catch (Exception ex)
-            //    {
-            //        if (TheTimer1 != null)
-            //            TheTimer1.Dispose();
-            //    }
-
-            //}, null, 1000, 100);
-            //string testImageTwo = Globals.Temp_Dir + "\\" + fileName;
-
-            //while (ImageComparer.CompareImages(Globals.FirstScene1Image, testImageTwo, Globals.AForgeConfig.CompareLevel, Globals.Temp_Dir, Globals.AForgeConfig.SimilarityThreshold) == false)
-            //{
-            //    AppProcess.SendKey(4);
-            //    System.Threading.Thread.Sleep(500);
-
-            //    fileName = AppProcess.TakeSceenshot();
-            //    System.Threading.Timer TheTimer2 = null;
-            //    t1 = 0;
-            //    TheTimer2 = new System.Threading.Timer((ot) =>
-            //    {
-            //        try
-            //        {
-            //            TheTimer2.Dispose();
-            //        }
-            //        catch (Exception ex)
-            //        {
-            //            if (TheTimer2 != null)
-            //                TheTimer2.Dispose();
-            //        }
-
-            //    }, null, 1000, 100);
-            //    testImageTwo = Globals.Temp_Dir + "\\" + fileName;
-
-
-
-
-            //}
-
-
-
-
-
             AppProcess.Swipe(new Point(1200, 700), new Point(100, 0), 500);
+
+
+
         }
 
 
@@ -741,13 +928,11 @@ namespace ADB
         private void frmStableVersion_Load(object sender, EventArgs e)
         {
 
-            IniFile f = new IniFile(@"Config\config.ini");
+            
             Globals.ScreenSize.Width = Int32.Parse(f.IniReadValue("phone", "width").ToString());
             Globals.ScreenSize.Height = Int32.Parse(f.IniReadValue("phone", "height").ToString());
 
-
             //tsslStatus.Text = AppProcess.GetDeviceDetails();
-
             //lbl.Text = Globals.ScreenSize.Width + "  " + Globals.ScreenSize.Height;
 
             Logger.ClearLog();
@@ -764,6 +949,11 @@ namespace ADB
             if (Directory.Exists(Application.StartupPath + "\\WorkingDirectory") == false)
                 Directory.CreateDirectory(Application.StartupPath + "\\WorkingDirectory");
 
+            lstLog.DataSource = Globals.MainLogs;
+
+
+
+
         }
 
 
@@ -771,7 +961,12 @@ namespace ADB
         private void btnClearLogs_Click(object sender, EventArgs e)
         {
             Logger.ClearLog();
+            lstLog.DataSource = null;
+            Globals.MainLogs.Clear();
             lstLog.Items.Clear();
+            lstLog.DataSource = Globals.MainLogs;
+
+
         }
 
 
@@ -861,23 +1056,7 @@ namespace ADB
         private void tmrStatus_Tick(object sender, EventArgs e)
         {
 
-            //ProcessOutput output = AppProcess.RunProcess("adb devices -l");
-            ////MessageBox.Show(output.Output.Split('\n').Length + "");
-            //string[] lines = output.Output.Split('\n');
-            //string data = "No Device Found";
-            //int cnt = 0;
-            //foreach (string line in lines)
-            //{
-            //    if (line.Trim() != string.Empty && line.Contains("device") == true)
-            //    {
-            //        data = line.Trim();
-            //        //lbl.Text = line ;
-            //        cnt++;
-            //    }
-            //}
-            //MessageBox.Show(cnt+"");
             tsslStatus.Text = AppProcess.GetDeviceDetails();
-            //lbl.Text = output.Output + "\n" + output.Error;
         }
 
         private void button4_Click(object sender, EventArgs e)
@@ -899,34 +1078,6 @@ namespace ADB
             }
         }
 
-        private void button5_Click(object sender, EventArgs e)
-        {
-
-
-            ManagementObjectCollection mbsList = null;
-            ManagementObjectSearcher mbs = new ManagementObjectSearcher("Select * From Win32_processor");
-            mbsList = mbs.Get();
-            string id = "";
-            foreach (ManagementObject mo in mbsList)
-            {
-                id = mo["ProcessorID"].ToString();
-            }
-
-            //Then you can get the motherboard serial number:
-
-            ManagementObjectSearcher mos = new ManagementObjectSearcher("SELECT * FROM Win32_BaseBoard");
-            ManagementObjectCollection moc = mos.Get();
-            string motherBoard = "";
-            foreach (ManagementObject mo in moc)
-            {
-                motherBoard = (string)mo["SerialNumber"];
-                MessageBox.Show(motherBoard);
-            }
-
-
-            string myUniqueID = id + motherBoard;
-            MessageBox.Show(myUniqueID);
-        }
 
         private void button6_Click(object sender, EventArgs e)
         {
@@ -942,7 +1093,17 @@ namespace ADB
         {
             string line = AppProcess.RunProcess("adb shell settings get system accelerometer_rotation").Output;
 
-            MessageBox.Show(line.Trim().Split('\n').Length+"");
+            MessageBox.Show(line.Trim().Split('\n').Length + "");
+        }
+
+        private void imageComaratorToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            new frmImageComparator().ShowDialog();
+        }
+
+        private void btnClear_Click(object sender, EventArgs e)
+        {
+            lstWatchedAds.Items.Clear();
         }
 
     }

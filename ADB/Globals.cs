@@ -13,6 +13,9 @@ namespace ADB
 {
     class Globals
     {
+
+        public const string APP_NAME = "com.scopely.headshot";
+
         public static string OfferImage = @"Base\offers.jpg";
         public static string EndOfferImage = @"Base\end-offer.jpg";
         public static string NoOfferImage = @"Base\no-offer.jpg";
@@ -30,7 +33,16 @@ namespace ADB
         public static string NetError2Image = @"Base\net-error-2.jpg";
         public static string PrestigeRewardsImage = @"Base\pr-rewards.jpg";
         public static string PrestigeRewardsClaimImage = @"Base\pr-rewards-claim.jpg";
+        public static string StartGamePrestigeRewardsClaimImage = @"Base\start-game-pr-rewards-claim.jpg";
+        
 
+
+        public static string ExitImage = @"Base\exit.jpg";
+        public static string WarWindow1Image = @"Base\war-window-1.jpg";
+        public static string WarWindow11Image = @"Base\war-window-1-1.jpg";
+        public static string WarWindow2Image = @"Base\war-window-2.jpg";
+
+        
 
         public static string Base_Dir;
         public static string Temp_Dir;
@@ -43,7 +55,7 @@ namespace ADB
         public static int NoOffersInARow = 0;
         public static int LoadingTriesInARow = 0;
         public static int ElseInARow = 0;
-
+        public static int AppNotRunningInARow = 0;
 
 
 
@@ -55,7 +67,9 @@ namespace ADB
         public static String[] AdsActivities = { 
                                                "com.mopub.mobileads",
                                                "com.unity3d.ads.adunit",
-                                               "com.adcolony.sdk"
+                                               "com.adcolony.sdk",
+                                               "com.applovin",
+                                               "com.vungle",
                                                };
 
         public static String[] GameActivities = { 
@@ -85,6 +99,8 @@ namespace ADB
 
 
 
+
+        public static List<String> MainLogs = new List<string>();
 
 
     }

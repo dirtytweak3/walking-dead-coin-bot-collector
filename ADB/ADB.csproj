@@ -96,6 +96,12 @@
     <Reference Include="AForge.Vision">
       <HintPath>C:\Users\kami\Downloads\AForge.NET Framework-2.2.5-(libs only)\Release\AForge.Vision.dll</HintPath>
     </Reference>
+    <Reference Include="Emgu.CV.UI">
+      <HintPath>C:\Emgu\emgucv-windesktop 3.3.0.2824\bin\Emgu.CV.UI.dll</HintPath>
+    </Reference>
+    <Reference Include="Emgu.CV.World">
+      <HintPath>C:\Emgu\emgucv-windesktop 3.3.0.2824\bin\Emgu.CV.World.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Management" />
@@ -111,12 +117,20 @@
   <ItemGroup>
     <Compile Include="AndroidKeys.cs" />
     <Compile Include="AppProcess.cs" />
+    <Compile Include="ConfigReader.cs" />
+    <Compile Include="DrawMatches.cs" />
     <Compile Include="FingerPrint.cs" />
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Form1.Designer.cs">
       <DependentUpon>Form1.cs</DependentUpon>
+    </Compile>
+    <Compile Include="frmImageComparator.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmImageComparator.Designer.cs">
+      <DependentUpon>frmImageComparator.cs</DependentUpon>
     </Compile>
     <Compile Include="frmMain.cs">
       <SubType>Form</SubType>
@@ -145,6 +159,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmImageComparator.resx">
+      <DependentUpon>frmImageComparator.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="frmMain.resx">
       <DependentUpon>frmMain.cs</DependentUpon>

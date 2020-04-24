@@ -53,15 +53,19 @@
             this.settingsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.registerToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.helpToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
+            this.imageComaratorToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.stt = new System.Windows.Forms.StatusStrip();
             this.tsslStatus = new System.Windows.Forms.ToolStripStatusLabel();
             this.tmrStatus = new System.Windows.Forms.Timer(this.components);
             this.button4 = new System.Windows.Forms.Button();
-            this.button5 = new System.Windows.Forms.Button();
             this.button6 = new System.Windows.Forms.Button();
-            this.registerToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.button7 = new System.Windows.Forms.Button();
+            this.btnClear = new System.Windows.Forms.Button();
+            this.lblSum = new System.Windows.Forms.Label();
+            this.label5 = new System.Windows.Forms.Label();
+            this.lblAppNotRunningInARow = new System.Windows.Forms.Label();
             this.mnu.SuspendLayout();
             this.stt.SuspendLayout();
             this.SuspendLayout();
@@ -202,7 +206,7 @@
             // lstWatchedAds
             // 
             this.lstWatchedAds.FormattingEnabled = true;
-            this.lstWatchedAds.Location = new System.Drawing.Point(751, 155);
+            this.lstWatchedAds.Location = new System.Drawing.Point(743, 242);
             this.lstWatchedAds.Name = "lstWatchedAds";
             this.lstWatchedAds.Size = new System.Drawing.Size(182, 303);
             this.lstWatchedAds.TabIndex = 37;
@@ -285,16 +289,32 @@
             // 
             this.helpToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.registerToolStripMenuItem,
-            this.helpToolStripMenuItem1});
+            this.helpToolStripMenuItem1,
+            this.imageComaratorToolStripMenuItem});
             this.helpToolStripMenuItem.Name = "helpToolStripMenuItem";
             this.helpToolStripMenuItem.Size = new System.Drawing.Size(44, 20);
             this.helpToolStripMenuItem.Text = "Help";
             // 
+            // registerToolStripMenuItem
+            // 
+            this.registerToolStripMenuItem.Name = "registerToolStripMenuItem";
+            this.registerToolStripMenuItem.Size = new System.Drawing.Size(186, 22);
+            this.registerToolStripMenuItem.Text = "Register";
+            this.registerToolStripMenuItem.Click += new System.EventHandler(this.registerToolStripMenuItem_Click);
+            // 
             // helpToolStripMenuItem1
             // 
             this.helpToolStripMenuItem1.Name = "helpToolStripMenuItem1";
-            this.helpToolStripMenuItem1.Size = new System.Drawing.Size(99, 22);
+            this.helpToolStripMenuItem1.Size = new System.Drawing.Size(186, 22);
             this.helpToolStripMenuItem1.Text = "Help";
+            // 
+            // imageComaratorToolStripMenuItem
+            // 
+            this.imageComaratorToolStripMenuItem.Name = "imageComaratorToolStripMenuItem";
+            this.imageComaratorToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F4;
+            this.imageComaratorToolStripMenuItem.Size = new System.Drawing.Size(186, 22);
+            this.imageComaratorToolStripMenuItem.Text = "Image Comarator";
+            this.imageComaratorToolStripMenuItem.Click += new System.EventHandler(this.imageComaratorToolStripMenuItem_Click);
             // 
             // stt
             // 
@@ -327,16 +347,6 @@
             this.button4.UseVisualStyleBackColor = true;
             this.button4.Click += new System.EventHandler(this.button4_Click);
             // 
-            // button5
-            // 
-            this.button5.Location = new System.Drawing.Point(504, 380);
-            this.button5.Name = "button5";
-            this.button5.Size = new System.Drawing.Size(75, 23);
-            this.button5.TabIndex = 45;
-            this.button5.Text = "button5";
-            this.button5.UseVisualStyleBackColor = true;
-            this.button5.Click += new System.EventHandler(this.button5_Click);
-            // 
             // button6
             // 
             this.button6.Location = new System.Drawing.Point(475, 434);
@@ -346,13 +356,6 @@
             this.button6.Text = "button6";
             this.button6.UseVisualStyleBackColor = true;
             this.button6.Click += new System.EventHandler(this.button6_Click);
-            // 
-            // registerToolStripMenuItem
-            // 
-            this.registerToolStripMenuItem.Name = "registerToolStripMenuItem";
-            this.registerToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
-            this.registerToolStripMenuItem.Text = "Register";
-            this.registerToolStripMenuItem.Click += new System.EventHandler(this.registerToolStripMenuItem_Click);
             // 
             // button7
             // 
@@ -364,14 +367,52 @@
             this.button7.UseVisualStyleBackColor = true;
             this.button7.Click += new System.EventHandler(this.button7_Click);
             // 
+            // btnClear
+            // 
+            this.btnClear.Location = new System.Drawing.Point(743, 213);
+            this.btnClear.Name = "btnClear";
+            this.btnClear.Size = new System.Drawing.Size(182, 23);
+            this.btnClear.TabIndex = 48;
+            this.btnClear.Text = "clear";
+            this.btnClear.UseVisualStyleBackColor = true;
+            this.btnClear.Click += new System.EventHandler(this.btnClear_Click);
+            // 
+            // lblSum
+            // 
+            this.lblSum.AutoSize = true;
+            this.lblSum.Location = new System.Drawing.Point(743, 552);
+            this.lblSum.Name = "lblSum";
+            this.lblSum.Size = new System.Drawing.Size(35, 13);
+            this.lblSum.TabIndex = 49;
+            this.lblSum.Text = "label5";
+            // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Location = new System.Drawing.Point(748, 159);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(134, 13);
+            this.label5.TabIndex = 28;
+            this.label5.Text = "App Not Running in a Row";
+            // 
+            // lblAppNotRunningInARow
+            // 
+            this.lblAppNotRunningInARow.AutoSize = true;
+            this.lblAppNotRunningInARow.Location = new System.Drawing.Point(920, 159);
+            this.lblAppNotRunningInARow.Name = "lblAppNotRunningInARow";
+            this.lblAppNotRunningInARow.Size = new System.Drawing.Size(13, 13);
+            this.lblAppNotRunningInARow.TabIndex = 30;
+            this.lblAppNotRunningInARow.Text = "0";
+            // 
             // frmStableVersion
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(937, 634);
+            this.Controls.Add(this.lblSum);
+            this.Controls.Add(this.btnClear);
             this.Controls.Add(this.button7);
             this.Controls.Add(this.button6);
-            this.Controls.Add(this.button5);
             this.Controls.Add(this.button4);
             this.Controls.Add(this.lstLog);
             this.Controls.Add(this.stt);
@@ -383,10 +424,12 @@
             this.Controls.Add(this.btnBackgoundWorker);
             this.Controls.Add(this.button3);
             this.Controls.Add(this.btnClearLogs);
+            this.Controls.Add(this.lblAppNotRunningInARow);
             this.Controls.Add(this.lblElseInARow);
             this.Controls.Add(this.lblLoadingInARow);
             this.Controls.Add(this.lblNoOfferInARow);
             this.Controls.Add(this.lblWatchedAds);
+            this.Controls.Add(this.label5);
             this.Controls.Add(this.label4);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.label2);
@@ -396,6 +439,7 @@
             this.Controls.Add(this.mnu);
             this.MainMenuStrip = this.mnu;
             this.Name = "frmStableVersion";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "frmStableVersion";
             this.Load += new System.EventHandler(this.frmStableVersion_Load);
             this.mnu.ResumeLayout(false);
@@ -438,9 +482,13 @@
         private System.Windows.Forms.ToolStripStatusLabel tsslStatus;
         private System.Windows.Forms.Timer tmrStatus;
         private System.Windows.Forms.Button button4;
-        private System.Windows.Forms.Button button5;
         private System.Windows.Forms.Button button6;
         private System.Windows.Forms.ToolStripMenuItem registerToolStripMenuItem;
         private System.Windows.Forms.Button button7;
+        private System.Windows.Forms.ToolStripMenuItem imageComaratorToolStripMenuItem;
+        private System.Windows.Forms.Button btnClear;
+        private System.Windows.Forms.Label lblSum;
+        private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.Label lblAppNotRunningInARow;
     }
 }
